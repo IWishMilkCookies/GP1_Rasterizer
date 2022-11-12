@@ -47,7 +47,20 @@ namespace dae
 			//ONB => invViewMatrix
 			//Inverse(ONB) => ViewMatrix
 
+			right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
+			up = Vector3::Cross(forward, right).Normalized();
+			invViewMatrix = Matrix
+			{
+				right,
+				up,
+				forward,
+				origin
+			};
+
 			//ViewMatrix => Matrix::CreateLookAtLH(...) [not implemented yet]
+			viewMatrix = invViewMatrix.Inverse();
+			
+			//viewMatrix = Matrix::CreateLookAtLH(origin, forward, up);
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 		}
 
@@ -65,6 +78,47 @@ namespace dae
 
 			//Camera Update Logic
 			//...
+			float movementSpeed{ 20.f };
+			float cameraSpeed{ 0.2f };
+
+			const uint8_t* pKeyboardState = SDL_GetKeyboardState(nullptr);
+			origin += (pKeyboardState[SDL_SCANCODE_W] | pKeyboardState[SDL_SCANCODE_UP]) * forward * deltaTime * movementSpeed;
+			origin += (pKeyboardState[SDL_SCANCODE_S] | pKeyboardState[SDL_SCANCODE_DOWN]) * -forward * deltaTime * movementSpeed;
+
+			origin += (pKeyboardState[SDL_SCANCODE_A] | pKeyboardState[SDL_SCANCODE_LEFT]) * -right * deltaTime * movementSpeed;
+			origin += (pKeyboardState[SDL_SCANCODE_D] | pKeyboardState[SDL_SCANCODE_RIGHT]) * right * deltaTime * movementSpeed;
+
+			int mouseX{}, mouseY{};
+			const uint32_t mouseState = SDL_GetRelativeMouseState(&mouseX, &mouseY);
+
+			switch (mouseState)
+			{
+			case SDL_BUTTON_X2:
+			{
+				origin += up * mouseY * deltaTime * movementSpeed;
+
+				break;
+			}
+			case SDL_BUTTON_LMASK:
+			{
+				origin += forward * mouseY * deltaTime * movementSpeed;
+
+				totalYaw += mouseX * cameraSpeed;
+				Matrix rotation = Matrix::CreateRotation(totalPitch * TO_RADIANS, 0, 0);
+				forward = rotation.TransformVector(Vector3::UnitZ);
+				forward.Normalize();
+				break;
+			}
+			case SDL_BUTTON_RMASK:
+			{
+				totalYaw += mouseX * cameraSpeed;
+				totalPitch += -mouseY * cameraSpeed;
+				Matrix rotation = Matrix::CreateRotation(totalPitch * TO_RADIANS, totalYaw * TO_RADIANS, 0);
+				forward = rotation.TransformVector(Vector3::UnitZ);
+				forward.Normalize();
+				break;
+			}
+			}
 
 			//Update Matrices
 			CalculateViewMatrix();
