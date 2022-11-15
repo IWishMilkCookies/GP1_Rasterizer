@@ -38,6 +38,7 @@ namespace dae
 
 		SDL_Surface* m_pFrontBuffer{ nullptr };
 		SDL_Surface* m_pBackBuffer{ nullptr };
+		Texture* m_pUVGrid{ nullptr };
 		uint32_t* m_pBackBufferPixels{};
 
 		float* m_pDepthBufferPixels{};
