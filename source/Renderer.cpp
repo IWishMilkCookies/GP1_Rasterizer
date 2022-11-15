@@ -108,19 +108,7 @@ void Renderer::Render()
 			{
 				
 				if ((px < Min.x || px > Max.x) || (py < Min.y || py > Max.y))
-				{
-					//ColorRGB finalColor{ 1.f,1.f,1.f };
-					//
-					//
-					////Update Color in Buffer
-					//finalColor.MaxToOne();
-					//
-					//m_pBackBufferPixels[px + (py * m_Width)] = SDL_MapRGB(m_pBackBuffer->format,
-					//	static_cast<uint8_t>(finalColor.r * 255),
-					//	static_cast<uint8_t>(finalColor.g * 255),
-					//	static_cast<uint8_t>(finalColor.b * 255));
 					continue;
-				}
 
 				int pixelIdx = px + (py * m_Width);
 				Vector2 currentPixel{static_cast<float>(px), static_cast<float>(py)};
@@ -146,9 +134,9 @@ void Renderer::Render()
 
 				m_pDepthBufferPixels[pixelIdx] = distanceWeight;
 
-				ColorRGB finalColor = weight0* vertices_world[i].color +
-					weight1 * vertices_world[i + 1].color +
-					weight2 * vertices_world[i + 2].color;
+				ColorRGB finalColor = weight1* vertices_world[i].color +
+					weight2 * vertices_world[i + 1].color +
+					weight0 * vertices_world[i + 2].color;
 				
 
 					//Update Color in Buffer
