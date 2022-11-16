@@ -251,9 +251,9 @@ void Renderer::Render()
 				//(weight2 * (meshes_world[0].vertices[meshIndeces[i + 2]].position.z) - m_Camera.origin.z)
 				//};
 
-				float zInterpolate1{ 1 / (meshes_world[0].vertices[meshIndeces[i]].position.z - m_Camera.origin.z) * weight0 };
-				float zInterpolate2{ 1 / (meshes_world[0].vertices[meshIndeces[i + 1]].position.z - m_Camera.origin.z) * weight1};
-				float zInterpolate3{ 1 / (meshes_world[0].vertices[meshIndeces[i + 2]].position.z - m_Camera.origin.z)* weight2};
+				float zInterpolate1{ 1 / meshes_world[0].vertices[meshIndeces[i]].position.z * weight0 };
+				float zInterpolate2{ 1 / meshes_world[0].vertices[meshIndeces[i + 1]].position.z * weight1};
+				float zInterpolate3{ 1 / meshes_world[0].vertices[meshIndeces[i + 2]].position.z * weight2};
 				float zInterpolateTotal{1 / (zInterpolate1 + zInterpolate2 + zInterpolate3)};
 
 				int pixelIdx = px + (py * m_Width);
