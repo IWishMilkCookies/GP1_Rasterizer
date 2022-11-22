@@ -167,7 +167,7 @@ void Renderer::Render()
 
 	VertexTransformationFunction(meshes_world[0].vertices, vertices_ndc);
 
-	for (auto& vertex : vertices_ndc)
+	for (Vertex& vertex : vertices_ndc)
 	{
 		raster_Vertices.push_back(Vector2{ (vertex.position.x + 1) * 0.5f * m_Width, (1 - vertex.position.y) * 0.5f * m_Height });
 	}
@@ -176,11 +176,13 @@ void Renderer::Render()
 #ifdef TRIANGLE_STRIP
 	for (size_t i = 0; i + 2 < meshIndeces.size(); ++i)
 #else
-	for (size_t i = 0; i + 2 < meshIndeces.size(); i += 3)
+	for (int i = 0; i + 2 < meshIndeces.size(); i += 3)
 #endif
 	{
-
-		Vector2 p0{ raster_Vertices[meshIndeces[i]] };
+		int idx0{ i };
+		int idx1{ i+1 };
+		int idx2{ i+2 };
+		Vector2 p0{ raster_Vertices[meshIndeces[idx0]] };
 		Vector2 p1{ };
 		Vector2 p2{ };
 
@@ -191,18 +193,18 @@ void Renderer::Render()
 #ifdef TRIANGLE_STRIP
 		if ((i ^ 1) == i + 1) //If true = even, else odd.
 		{
-			p1 = raster_Vertices[meshIndeces[i + 1]];
-			p2 = raster_Vertices[meshIndeces[i + 2]];
+			p1 = raster_Vertices[meshIndeces[idx1]];
+			p2 = raster_Vertices[meshIndeces[idx2]];
 		}
 		else
 		{
-			p1 = raster_Vertices[meshIndeces[i + 2]];
-			p2 = raster_Vertices[meshIndeces[i + 1]];
+			p1 = raster_Vertices[meshIndeces[idx2]];
+			p2 = raster_Vertices[meshIndeces[idx1]];
 
 		}
 #else
-		p1 = raster_Vertices[meshIndeces[i + 1]];
-		p2 = raster_Vertices[meshIndeces[i + 2]];
+		p1 = raster_Vertices[meshIndeces[idx1]];
+		p2 = raster_Vertices[meshIndeces[idx2]];
 #endif
 
 		e0 = p1 - p0;
@@ -246,42 +248,31 @@ void Renderer::Render()
 				float weight1 = currPixMin2Crossv2 / triangleArea;
 				float weight2 = currPixMin0Crossv0 / triangleArea;
 
-				//float distanceWeight{ (weight0 * (meshes_world[0].vertices[meshIndeces[i]].position.z) - m_Camera.origin.z) +
-				//(weight1 * (meshes_world[0].vertices[meshIndeces[i + 1]].position.z) - m_Camera.origin.z) +
-				//(weight2 * (meshes_world[0].vertices[meshIndeces[i + 2]].position.z) - m_Camera.origin.z)
-				//};
-
-				float zInterpolate1{ 1 / meshes_world[0].vertices[meshIndeces[i]].position.z * weight0 };
-				float zInterpolate2{ 1 / meshes_world[0].vertices[meshIndeces[i + 1]].position.z * weight1};
-				float zInterpolate3{ 1 / meshes_world[0].vertices[meshIndeces[i + 2]].position.z * weight2};
-				float zInterpolateTotal{1 / (zInterpolate1 + zInterpolate2 + zInterpolate3)};
+				const float depthV0{ (vertices_ndc[meshIndeces[idx0]].position.z) };
+				const float depthV1{ (vertices_ndc[meshIndeces[idx1]].position.z) };
+				const float depthV2{ (vertices_ndc[meshIndeces[idx2]].position.z) };
+				// Calculate the depth at this pixel
+				const float interpolatedDepth
+				{
+					1.0f /
+						(weight0 / depthV0 +
+						weight1 / depthV1 +
+						weight2 / depthV2)
+				};
 
 				int pixelIdx = px + (py * m_Width);
-				if (m_pDepthBufferPixels[pixelIdx] < zInterpolateTotal)
+				if (m_pDepthBufferPixels[pixelIdx] < interpolatedDepth)
 					continue;
 
-				Vector2 uvInterpolate1{ weight0 * (meshes_world[0].vertices[meshIndeces[i]].uv/ meshes_world[0].vertices[meshIndeces[i]].position.z)};
-				Vector2 uvInterpolate2{ weight1 * (meshes_world[0].vertices[meshIndeces[i + 1]].uv / meshes_world[0].vertices[meshIndeces[i+1]].position.z)};
-				Vector2 uvInterpolate3{ weight2 * (meshes_world[0].vertices[meshIndeces[i + 2]].uv / meshes_world[0].vertices[meshIndeces[i+2]].position.z )};
+				Vector2 uvInterpolate1{ weight0 * (vertices_ndc[meshIndeces[idx0]].uv/ depthV0 )};
+				Vector2 uvInterpolate2{ weight1 * (vertices_ndc[meshIndeces[idx1]].uv / depthV1)};
+				Vector2 uvInterpolate3{ weight2 * (vertices_ndc[meshIndeces[idx2]].uv / depthV2)};
 
 				Vector2 uvInterpolateTotal{uvInterpolate1 + uvInterpolate2 + uvInterpolate3};
 
-				auto uvInterpolated{zInterpolateTotal * uvInterpolateTotal};
+				Vector2 uvInterpolated{ interpolatedDepth * uvInterpolateTotal};
 
-				m_pDepthBufferPixels[pixelIdx] = zInterpolateTotal;
-
-				//ColorRGB finalColor = 
-				//	weight0 * meshes_world[0].vertices[meshIndeces[i]].color +
-				//	weight1 * meshes_world[0].vertices[meshIndeces[i+1]].color +
-				//	weight2 * meshes_world[0].vertices[meshIndeces[i+2]].color;
-				//Vector2 temp{ weight0 * meshes_world[0].vertices[meshIndeces[i]].uv };
-				//Vector2 temp1{ weight1 * meshes_world[0].vertices[meshIndeces[i + 1]].uv };
-				//Vector2 temp2{ weight2 * meshes_world[0].vertices[meshIndeces[i + 2]].uv };
-				//
-				//
-				//Vector2 uvInter{ temp +
-				//				temp1 +
-				//				temp2 };
+				m_pDepthBufferPixels[pixelIdx] = interpolatedDepth;
 
 				ColorRGB finalColor{ m_pUVGrid->Sample(uvInterpolated) };
 
@@ -309,14 +300,14 @@ void Renderer::VertexTransformationFunction(const std::vector<Vertex>& vertices_
 {
 	//Todo > W1 Projection Stage
 	vertices_out.reserve(vertices_in.size());
-	for (auto currentVertex : vertices_in)
+	for (Vertex currentVertex : vertices_in)
 	{
 		currentVertex.position = m_Camera.invViewMatrix.TransformPoint(currentVertex.position);
-		float invVertexX = currentVertex.position.x / (m_Camera.fov * m_AspectRatio) / currentVertex.position.z;
-		float invVertexY = currentVertex.position.y / m_Camera.fov / currentVertex.position.z;
+		currentVertex.position.x = currentVertex.position.x / (m_Camera.fov * m_AspectRatio) / currentVertex.position.z;
+		currentVertex.position.y = currentVertex.position.y / m_Camera.fov / currentVertex.position.z;
 
 
-		vertices_out.push_back(Vertex{ Vector3{ invVertexX, invVertexY, currentVertex.position.z } });
+		vertices_out.push_back(currentVertex);
 	}
 }
 
