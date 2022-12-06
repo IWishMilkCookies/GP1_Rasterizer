@@ -4,6 +4,7 @@
 
 #include "MathHelpers.h"
 #include <cmath>
+#include "Math.h"
 
 namespace dae {
 	Matrix::Matrix(const Vector3& xAxis, const Vector3& yAxis, const Vector3& zAxis, const Vector3& t) :
@@ -151,9 +152,21 @@ namespace dae {
 
 	Matrix Matrix::CreatePerspectiveFovLH(float fov, float aspect, float zn, float zf)
 	{
+		//	where:
+		//  yScale = cot(fovY / 2)
+		//
+		//	xScale = yScale / aspect ratio
+		auto yScale = cos(fov / 2) / sin(fov/2);
+		auto xScale = yScale / aspect;
 		//TODO W2
+		Matrix projectionMatrix{
+		 {xScale,     0,			 0,				0	},
+		   {0,        yScale,       0,             0	},
+		   {0,         0,       zf / (zf - zn),    1	},
+		   {0,         0,		-zn * zf / (zf - zn),	0	}
+		};
 
-		return {};
+		return projectionMatrix;
 	}
 
 	Vector3 Matrix::GetAxisX() const

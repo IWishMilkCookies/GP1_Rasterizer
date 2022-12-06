@@ -29,9 +29,12 @@ namespace dae
 
 		float totalPitch{};
 		float totalYaw{};
+		float nearPlane{ .1f };
+		float farPlane{100.f};
 
 		Matrix invViewMatrix{};
 		Matrix viewMatrix{};
+		Matrix projectionMatrix{};
 
 		void Initialize(float _fovAngle = 90.f, Vector3 _origin = {0.f,0.f,0.f})
 		{
@@ -64,11 +67,10 @@ namespace dae
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 		}
 
-		void CalculateProjectionMatrix()
+		void CalculateProjectionMatrix(float aspectRatio)
 		{
 			//TODO W2
-
-			//ProjectionMatrix => Matrix::CreatePerspectiveFovLH(...) [not implemented yet]
+			projectionMatrix = Matrix::CreatePerspectiveFovLH( fov, aspectRatio, nearPlane, farPlane);
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovlh
 		}
 
@@ -122,7 +124,7 @@ namespace dae
 
 			//Update Matrices
 			CalculateViewMatrix();
-			CalculateProjectionMatrix(); //Try to optimize this - should only be called once or when fov/aspectRatio changes
+			void CalculateProjectionMatrix(float aspectRatio); //Try to optimize this - should only be called once or when fov/aspectRatio changes
 		}
 	};
 }

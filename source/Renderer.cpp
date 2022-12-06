@@ -53,7 +53,7 @@ void Renderer::Render()
 	Uint32 clearColor{ 100 };
 	SDL_FillRect(m_pBackBuffer, NULL, SDL_MapRGB(m_pBackBuffer->format, clearColor, clearColor, clearColor));
 
-	std::vector<Vertex> vertices_ndc;
+	std::vector<Vertex_Out> vertices_ndc;
 	std::vector<Vector2> raster_Vertices;
 
 
@@ -163,11 +163,12 @@ void Renderer::Render()
 
 #endif // TRIANGLE_STRIP
 
+	m_Camera.CalculateProjectionMatrix(m_AspectRatio);
 
 
 	VertexTransformationFunction(meshes_world[0].vertices, vertices_ndc);
 
-	for (Vertex& vertex : vertices_ndc)
+	for (Vertex_Out& vertex : vertices_ndc)
 	{
 		raster_Vertices.push_back(Vector2{ (vertex.position.x + 1) * 0.5f * m_Width, (1 - vertex.position.y) * 0.5f * m_Height });
 	}
@@ -296,18 +297,18 @@ void Renderer::Render()
 	SDL_UpdateWindowSurface(m_pWindow);
 }
 
-void Renderer::VertexTransformationFunction(const std::vector<Vertex>& vertices_in, std::vector<Vertex>& vertices_out) const
+void Renderer::VertexTransformationFunction(const std::vector<Vertex>& vertices_in, std::vector<Vertex_Out>& vertices_out) const
 {
 	//Todo > W1 Projection Stage
 	vertices_out.reserve(vertices_in.size());
 	for (Vertex currentVertex : vertices_in)
 	{
 		currentVertex.position = m_Camera.invViewMatrix.TransformPoint(currentVertex.position);
-		currentVertex.position.x = currentVertex.position.x / (m_Camera.fov * m_AspectRatio) / currentVertex.position.z;
-		currentVertex.position.y = currentVertex.position.y / m_Camera.fov / currentVertex.position.z;
+		currentVertex.position.x = currentVertex.position.x / (m_Camera.fov * m_AspectRatio);// / currentVertex.position.z;
+		currentVertex.position.y = currentVertex.position.y / m_Camera.fov; // / currentVertex.position.z;
+		Vertex_Out vertexOut{ currentVertex.position };
 
-
-		vertices_out.push_back(currentVertex);
+		vertices_out.push_back(vertexOut);
 	}
 }
 
