@@ -12,9 +12,10 @@ namespace dae
 	{
 		Camera() = default;
 
-		Camera(const Vector3& _origin, float _fovAngle):
+		Camera(const Vector3& _origin, float _fovAngle, float aspectRatio):
 			origin{_origin},
-			fovAngle{_fovAngle}
+			fovAngle{_fovAngle},
+			camAspectRatio{aspectRatio}
 		{
 		}
 
@@ -31,17 +32,20 @@ namespace dae
 		float totalYaw{};
 		float nearPlane{ .1f };
 		float farPlane{100.f};
+		float camAspectRatio{};
 
 		Matrix invViewMatrix{};
 		Matrix viewMatrix{};
 		Matrix projectionMatrix{};
 
-		void Initialize(float _fovAngle = 90.f, Vector3 _origin = {0.f,0.f,0.f})
+		void Initialize(float aspectRatio, float _fovAngle = 90.f, Vector3 _origin = {0.f,0.f,0.f})
 		{
 			fovAngle = _fovAngle;
 			fov = tanf((fovAngle * TO_RADIANS) / 2.f);
 
 			origin = _origin;
+			camAspectRatio = aspectRatio;
+			CalculateProjectionMatrix();
 		}
 
 		void CalculateViewMatrix()
@@ -67,10 +71,10 @@ namespace dae
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixlookatlh
 		}
 
-		void CalculateProjectionMatrix(float aspectRatio)
+		void CalculateProjectionMatrix()
 		{
 			//TODO W2
-			projectionMatrix = Matrix::CreatePerspectiveFovLH( fov, aspectRatio, nearPlane, farPlane);
+			projectionMatrix = Matrix::CreatePerspectiveFovLH( fov, camAspectRatio, nearPlane, farPlane);
 			//DirectX Implementation => https://learn.microsoft.com/en-us/windows/win32/direct3d9/d3dxmatrixperspectivefovlh
 		}
 
@@ -124,7 +128,7 @@ namespace dae
 
 			//Update Matrices
 			CalculateViewMatrix();
-			void CalculateProjectionMatrix(float aspectRatio); //Try to optimize this - should only be called once or when fov/aspectRatio changes
+			void CalculateProjectionMatrix(); //Try to optimize this - should only be called once or when fov/aspectRatio changes
 		}
 	};
 }

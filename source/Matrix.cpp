@@ -156,8 +156,8 @@ namespace dae {
 		//  yScale = cot(fovY / 2)
 		//
 		//	xScale = yScale / aspect ratio
-		auto yScale = cos(fov / 2) / sin(fov/2);
-		auto xScale = yScale / aspect;
+		auto xScale = 1 / (aspect * fov);
+		auto yScale = 1/ fov;
 		//TODO W2
 		Matrix projectionMatrix{
 		 {xScale,     0,			 0,				0	},
