@@ -154,6 +154,7 @@ namespace dae {
 		 
 		auto xScale = 1 / (fov * aspect);
 		auto yScale = 1 / fov;
+
 		//TODO W2
 		Matrix projectionMatrix{
 		   {xScale,     0,			  0,					0},

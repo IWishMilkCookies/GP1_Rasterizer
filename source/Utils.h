@@ -3,8 +3,9 @@
 #include <fstream>
 #include "Math.h"
 #include "DataTypes.h"
+#include <algorithm>
 
-#define DISABLE_OBJ
+//#define DISABLE_OBJ
 
 namespace dae
 {
@@ -170,6 +171,12 @@ namespace dae
 
 			return true;
 #endif
+		}
+
+		float Remap(float depthValue, float min, float max)
+		{
+			const float clamped{ std::clamp(depthValue, min, max) };
+			return (clamped - min) / (max - min);
 		}
 #pragma warning(pop)
 	}
