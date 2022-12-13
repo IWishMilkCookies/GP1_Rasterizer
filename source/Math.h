@@ -5,3 +5,5 @@
 #include "Matrix.h"
 #include "ColorRGB.h"
 #include "MathHelpers.h"
+#include <math.h>
+#include <algorithm>
