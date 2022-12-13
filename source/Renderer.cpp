@@ -165,7 +165,7 @@ void Renderer::Render()
 
 	m_Camera.CalculateProjectionMatrix(m_AspectRatio);
 
-
+	//Transforming to view space
 	VertexTransformationFunction(meshes_world[0].vertices, vertices_ndc);
 
 	for (Vertex_Out& vertex : vertices_ndc)
@@ -243,6 +243,10 @@ void Renderer::Render()
 				float currPixMin2Crossv2 = Vector2::Cross(e2, currentPixel - p2);
 
 				if (!(currPixMin0Crossv0 > 0 && currPixMin1Crossv1 > 0 && currPixMin2Crossv2 > 0))
+					continue;
+
+				//Check if the current point of the mesh is between the planes
+				if (vertices_ndc[i].position.w < m_Camera.nearPlane || vertices_ndc[i].position.w > m_Camera.farPlane)
 					continue;
 
 				float weight0 = currPixMin1Crossv1 / triangleArea;

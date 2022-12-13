@@ -145,25 +145,21 @@ namespace dae {
 
 	Matrix Matrix::CreateLookAtLH(const Vector3& origin, const Vector3& forward, const Vector3& up)
 	{
-		//TODO W1
-
+		//TODO W1			
 		return {};
 	}
 
 	Matrix Matrix::CreatePerspectiveFovLH(float fov, float aspect, float zn, float zf)
 	{
-		//	where:
-		//  yScale = cot(fovY / 2)
-		//
-		//	xScale = yScale / aspect ratio
-		auto yScale = cos(fov / 2) / sin(fov/2);
-		auto xScale = yScale / aspect;
+		 
+		auto xScale = 1 / (fov * aspect);
+		auto yScale = 1 / fov;
 		//TODO W2
 		Matrix projectionMatrix{
-		 {xScale,     0,			 0,				0	},
-		   {0,        yScale,       0,             0	},
-		   {0,         0,       zf / (zf - zn),    1	},
-		   {0,         0,		-zn * zf / (zf - zn),	0	}
+		   {xScale,     0,			  0,					0},
+		   {0,			yScale,       0,					0},
+		   {0,			0,			  zf / (zf - zn),		1},
+		   {0,			0,			  -zn * zf / (zf - zn),	0}
 		};
 
 		return projectionMatrix;

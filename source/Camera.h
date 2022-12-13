@@ -49,7 +49,6 @@ namespace dae
 			//TODO W1
 			//ONB => invViewMatrix
 			//Inverse(ONB) => ViewMatrix
-
 			right = Vector3::Cross(Vector3::UnitY, forward).Normalized();
 			up = Vector3::Cross(forward, right).Normalized();
 			invViewMatrix = Matrix
@@ -59,7 +58,6 @@ namespace dae
 				forward,
 				origin
 			};
-
 			//ViewMatrix => Matrix::CreateLookAtLH(...) [not implemented yet]
 			viewMatrix = invViewMatrix.Inverse();
 			
